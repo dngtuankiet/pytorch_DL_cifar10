@@ -1,0 +1,68 @@
+GUIDE TO IMPORT LIBTORCH C++ AND LOAD A TORCH SCRIPT MODEL VISUAL STUDIO 2019
+
+IMPORT LIBTORCH C++ LIBRARY TO VISUAL STUDIO 2019
+
+-Open Project Configuration
+-Choose Configuration Release - Platform x64
+-Open C/C++/General:
+	In Additional Include Directories, add:
+		C:\libtorch\include\torch\csrc\api\include\torch
+		C:\libtorch\include
+		C:\Python38\include
+-Open Linker/General:
+	In Additional Library Directories, add:
+		C:\Python38\libs
+		C:\libtorch\lib
+-Open Linker/Input:
+	In Addition Dependencies, add:
+		torch.lib
+ 		torch_cpu.lib
+ 		c10.lib
+ 		python38.lib //depend on the version of Python in C:\Python38\libs
+-Open Build Events/Post-build Event:
+	In Command Line, add:
+		copy /y C:\libtorch\lib\*.dll
+
+
+
+IMPORT A MODEL USING LIBTORCH C++ LIBRARY
+
+-Create a "CmakeLists.txt" with the following content
+	cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+
+	project(PytorchTest)		//Can be change with different name of the project
+
+	find_package(Torch REQUIRED)
+
+	option(CMAKE_USE_WIN32_THREADS_INIT "using WIN32 threads" ON)
+	option(gtest_disable_pthreads "Disable uses of pthreads in gtest." ON)
+
+	add_executable(PytorchTest PytorchTest/PytorchTest.cpp)		//Can be change with different name of the project
+
+	target_link_libraries(PytorchTest "${TORCH_LIBRARIES}")		//Can be change with different name of the project
+
+	set_property(TARGET PytorchTest PROPERTY CXX_STANDARD 14)	//Can be change with different name of the project
+	
+-Save the Cmake file in Project folder
+
+-Sample C++ code of loading an exported model can be found in: https://pytorch.org/tutorials/advanced/cpp_export.html
+
+-You can build the project at this stage to check the above configuration is ok or not (You can skip this and go to the next step).
+ But after building the application cant run yet.
+
+-On VS2019 Tab, Open Tools/Command Line/Developer Command Prompt:
+	Run the following command:
+		cmake -DCMAKE_PREFIX_PATH=C:/libtorch		// "C:/libtorch" is the path of libtorch library in my PC
+	If error occurs, keep run the command for a few times, until it reports success.
+
+-After that, VS2019 will pop up a window to Reload the enviroment, click "Reload"
+
+-In the Solution Explorer:
+	You may see that ALL_BUILD is chosen as the startup project
+	Right Click on your project, choose "Set As StarTup Project"
+
+-Open Project Configuration
+
+-Open Build Events/Post-build Event:
+	In Command Line, add:
+		copy /y C:\libtorch\lib\*.dll
